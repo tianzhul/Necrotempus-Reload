@@ -1,0 +1,13 @@
+{
+  "glyphs": [
+    {
+      "target": "\u1f7f",
+      "resource": "minecraft:textures/items/cake.png",
+      "horizontalPadding": 0,
+      "verticalPadding": 0,
+      "width": 16,
+      "height": 16,
+      "fitMode": "CONTAINS"
+    }
+  ]
+}
