@@ -1,0 +1,54 @@
+name: Pre-release build
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Enforce gradle permission
+        run: chmod 777 ./gradlew
+
+      - name: Show debug info
+        run: ./gradlew --version
+
+      - name: Get short hash
+        id: short_sha
+        run: echo "::set-output name=sha::$(expr substr ${{ github.sha }} 1 7)"
+
+      - name: Set version based on generated hash
+        run: git tag dev-${{ steps.short_sha.outputs.sha }}
+
+      - name: Setup NecroTempus
+        run: ./gradlew clean setupDecompWorkspace --refresh-dependencies
+
+      - name: Build NecroTempus distribution packages
+        run: ./gradlew build
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: staging-${{ steps.short_sha.outputs.sha }}
+          prerelease: true
+          name: Staging branch build ${{ steps.short_sha.outputs.sha }}
+          body: |
+            This is an automatic pre-release build of commit ${{ github.sha }}
+            With this release you can test ahead of time the next NecroTempus release candidate
+          files: |
+            build/libs/*
