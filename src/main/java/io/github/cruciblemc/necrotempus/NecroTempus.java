@@ -23,12 +23,14 @@ import io.github.cruciblemc.necrotempus.modules.features.playertab.network.Playe
 import io.github.cruciblemc.necrotempus.modules.features.playertab.network.PlayerTabPacketHandler;
 import io.github.cruciblemc.necrotempus.modules.features.title.network.TitlePacket;
 import io.github.cruciblemc.necrotempus.modules.features.title.network.TitlePacketHandler;
+import io.github.cruciblemc.necrotempus.packet.GlyphConfigPacket;
+import io.github.cruciblemc.necrotempus.packet.GlyphConfigPacketHandler;
 import io.github.cruciblemc.necrotempus.packet.GlyphManager;
-import io.github.cruciblemc.necrotempus.packet.SyncGlyphConfig;
 import io.github.cruciblemc.necrotempus.proxy.CommonProxy;
 import io.github.cruciblemc.omniconfig.api.OmniconfigAPI;
 import lombok.Getter;
 import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraftforge.common.MinecraftForge;
 import org.apache.logging.log4j.Logger;
 
 
@@ -47,6 +49,7 @@ public class NecroTempus {
 
     public static SimpleNetworkWrapper DISPATCHER = NetworkRegistry.INSTANCE.newSimpleChannel(Tags.MODID + ":main");
 
+
     @Getter
     public Logger logger;
 
@@ -56,7 +59,7 @@ public class NecroTempus {
         DISPATCHER.registerMessage(PlayerTabPacketHandler.class, PlayerTabPacket.class, 2, Side.CLIENT);
         DISPATCHER.registerMessage(TitlePacketHandler.class, TitlePacket.class, 3, Side.CLIENT);
         DISPATCHER.registerMessage(ActionBarPacketHandler.class, ActionBarPacket.class, 4, Side.CLIENT);
-        DISPATCHER.registerMessage(SyncGlyphConfig.Handler.class, SyncGlyphConfig.class, 5, Side.CLIENT);
+        DISPATCHER.registerMessage(GlyphConfigPacketHandler.class, GlyphConfigPacket.class, 5, Side.CLIENT);
     }
     @Getter
     private GlyphManager glyphManager = new GlyphManager();
@@ -64,6 +67,7 @@ public class NecroTempus {
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
+        MinecraftForge.EVENT_BUS.register(this); // 注册事件总线
         OmniconfigAPI.registerAnnotationConfig(NecroTempusConfig.class);
         proxy.preInit(event);
         FMLCommonHandler.instance().bus().register(this);
@@ -89,7 +93,6 @@ public class NecroTempus {
     @SuppressWarnings("rawtypes")
     @SubscribeEvent
     public void onNetworkRegister(FMLNetworkEvent.CustomPacketRegistrationEvent event) {
-
         if (event.operation.equals("REGISTER")) {
 
             boolean hasNecroTempus = event.registrations.contains(Tags.MODID + ":main");
@@ -102,5 +105,6 @@ public class NecroTempus {
         }
 
     }
+
 
 }
