@@ -36,7 +36,10 @@ public class SyncGlyphConfig implements IMessage {
         @Override
         @SideOnly(Side.CLIENT)
         public IMessage onMessage(SyncGlyphConfig message, MessageContext ctx) {
-            Minecraft.getMinecraft().func_152344_a(() -> GlyphManager.handleConfigUpdate(message.config));
+            // 1.7.10 主线程调度
+            Minecraft.getMinecraft().func_152344_a(() -> {
+                GlyphManager.handleConfigUpdate(message.config);
+            });
             return null;
         }
     }
